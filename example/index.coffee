@@ -4,11 +4,12 @@
 
 {SECOND} = Phaser.Timer
 
-BUNNY_COUNT = 1e4
-BUNNY_LIFESPAN = 10 * SECOND
+# BUNNY_COUNT = 1e4
+BUNNY_LIFESPAN = 5 * SECOND
 BUNNY_INTERVAL = 100
 BUNNIES_PER_EMIT = 10
-RENDER_MODE = Phaser.WEBGL
+CONFIG_WIDTH = 800
+CONFIG_HEIGHT = 480
 
 debugSettings =
   "debug.gameInfo()": no
@@ -72,11 +73,11 @@ pluginGui = (plugin, gui) ->
 @GAME = new Phaser.Game(
 
   antialias: on
-  height: window.innerHeight
+  height: CONFIG_HEIGHT
   renderer: RENDER_MODE
   resolution: 1
   scaleMode: Phaser.ScaleManager.NO_SCALE
-  width: window.innerWidth
+  width: CONFIG_WIDTH
 
   state:
 
@@ -106,17 +107,19 @@ pluginGui = (plugin, gui) ->
     create: ->
       world = @world
       sky = @add.image 0, 0, "sky"
-      sky.height = world.height
-      sky.width = world.width
-      emitter = @emitter = @add.emitter(world.bounds.left, world.centerY, BUNNY_COUNT)
+      sky.height = CONFIG_HEIGHT
+      sky.width = CONFIG_WIDTH
+      emitter = @emitter = @add.emitter(world.bounds.left, CONFIG_HEIGHT/4, BUNNY_COUNT)
       emitter.makeBunnies = @emitterMakeBunnies.bind emitter
       emitter.makeBunnies()
+      emitter.bounce.setTo(1, 1);
       emitter.flow BUNNY_LIFESPAN, BUNNY_INTERVAL, BUNNIES_PER_EMIT
       @add.tween(emitter).to { emitX: world.width }, 2000, Phaser.Easing.Sinusoidal.InOut, yes, 0, -1, yes
+
       @gui = new dat.GUI width: 320
       emitterGui emitter, @gui.addFolder "bunnies"
       gameGui @game, @gui.addFolder "game"
-      gameScaleGui @game.scale, @gui.addFolder "game.scale"
+      # gameScaleGui @game.scale, @gui.addFolder "game.scale"
       gameTimeGui @game.time, @gui.addFolder "game.time"
       pluginGui @game.timing, pluginGuiFolder = @gui.addFolder "plugin"
       pluginGuiFolder.open()
@@ -127,6 +130,8 @@ pluginGui = (plugin, gui) ->
       {debug} = @game
       debug.gameInfo 300, 20      if debugSettings["debug.gameInfo()"]
       debug.gameTimeInfo 300, 120 if debugSettings["debug.gameTimeInfo()"]
+
+      debug.text "Alive / Dead:"+@emitter.countLiving()+" / "+@emitter.countDead(), 0, 30
       return
 
     shutdown: ->
@@ -134,6 +139,6 @@ pluginGui = (plugin, gui) ->
       return
 
     emitterMakeBunnies: ->
-      @makeParticles "bunny", null, @maxParticles
+      @makeParticles "bunny", null, @maxParticles, false, true
       return
 )
