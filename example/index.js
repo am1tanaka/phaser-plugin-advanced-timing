@@ -33,7 +33,7 @@
   };
 
   emitterGui = function(emitter, gui) {
-    gui.add(emitter, "_flowQuantity", 0, 100, 5);
+    gui.add(emitter, "_flowQuantity", 0, 100, 1);
     gui.add(emitter, "frequency", 0, 1 * SECOND, 50);
     gui.add(emitter, "lifespan", 0, 10 * SECOND, 100);
     gui.add(emitter, "makeBunnies");
